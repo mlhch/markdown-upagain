@@ -1,0 +1,103 @@
+<h1>lxc - libvirt</h1>
+
+<p>2016-07-17 10:09:29 Sunday</p>
+
+<p><a href="http://libvirt.org/" target="_blank">http://libvirt.org/</a></p>
+
+<blockquote>
+<p>原来这东西是用来一统虚拟江山的，lxc, kvm 等通知</p>
+</blockquote>
+
+<h2>libvirt is:</h2>
+
+<ul>
+	<li>A toolkit to interact with the virtualization capabilities of recent versions of Linux (and other OSes), see our&nbsp;<a href="http://libvirt.org/goals.html">project goals</a>&nbsp;for details.</li>
+	<li>Free software available under the&nbsp;<a href="http://www.opensource.org/licenses/lgpl-license.html">GNU Lesser General Public License</a>.</li>
+	<li>A long term stable C API</li>
+	<li>A set of bindings for common languages</li>
+	<li>A&nbsp;<a href="http://libvirt.org/CIM/">CIM provider</a>&nbsp;for the DMTF virtualization schema</li>
+	<li>A&nbsp;<a href="http://libvirt.org/qpid/">QMF agent</a>&nbsp;for the AMQP/QPid messaging system</li>
+	<li>A&nbsp;<a href="http://libvirt.org/governance.html">technical meritocracy</a>, in which participants gain influence over a project through recognition of their contributions.</li>
+</ul>
+
+<p>其旨在为包括Xen、kvm在内的各种虚拟化工具提供一套方便、可靠的编程接口，支持与C,C++,Ruby,Python,Java等多种主流开发语言的绑定。当前主流Linux平台上默认的虚拟化管理工具virt-manager(图形化),virt-install（命令行模式）等均基于libvirt开发而成。</p>
+
+<p>Libvirt 库是一种实现 Linux 虚拟化功能的 Linux&reg; API，它支持各种虚拟机监控程序，包括 Xen 和 KVM，以及 QEMU 和用于其他操作系统的一些虚拟产品。</p>
+
+<h2>kvm qemu libvirt 的区别和联系</h2>
+
+<p>在所谓的kvm技术中，应用到的其实有2个东西：qemu+kvm。</p>
+
+<p>kvm 负责 cpu 虚拟化+内存虚拟化，实现了cpu和内存的虚拟化，但kvm不能模拟其他设备</p>
+
+<p>qemu是模拟IO设备（网卡，磁盘），kvm加上qemu之后就能实现真正意义上服务器虚拟化。<br />
+因为用到了上面两个东西，所以一般都称之为qemu-kvm。</p>
+
+<p>libvirt则是调用kvm虚拟化技术的接口用于管理的，用libvirt管理方便，直接用qemu-kvm的接口太繁琐。</p>
+
+<h2>为什么需要Libvirt？</h2>
+
+<ol>
+	<li>Hypervisor 比如 qemu-kvm 的命令行虚拟机管理工具参数众多，难于使用。</li>
+	<li>Hypervisor 种类众多，没有统一的编程接口来管理它们，这对云环境来说非常重要。</li>
+	<li>没有统一的方式来方便地定义虚拟机相关的各种可管理对象。</li>
+</ol>
+
+<h2>Libvirt提供了什么？</h2>
+
+<ol>
+	<li>它提供统一、稳定、开放的源代码的应用程序接口（API）、守护进程 （libvirtd）和和一个默认命令行管理工具（virsh）。</li>
+	<li>它提供了对虚拟化客户机和它的虚拟化设备、网络和存储的管理。</li>
+	<li>它提供了一套较为稳定的C语言应用程序接口。目前，在其他一些流行的编程语言中也提供了对libvirt的绑定，在Python、Perl、Java、Ruby、PHP、OCaml等高级编程语言中已经有libvirt的程序库可以直接使用。</li>
+	<li>它对多种不同的 Hypervisor 的支持是通过一种基于驱动程序的架构来实现的。libvirt 对不同的 Hypervisor 提供了不同的驱动，包括 Xen 的驱动，对QEMU/KVM 有 QEMU 驱动，VMware 驱动等。在 libvirt 源代码中，可以很容易找到 qemu_driver.c、xen_driver.c、xenapi_driver.c、vmware_driver.c、vbox_driver.c 这样的驱动程序源代码文件。</li>
+	<li>它作为中间适配层，让底层 Hypervisor 对上层用户空间的管理工具是可以做到完全透明的，因为 libvirt 屏蔽了底层各种 Hypervisor 的细节，为上层管理工具提供了一个统一的、较稳定的接口（API）。</li>
+	<li>它使用 XML 来定义各种虚拟机相关的受管理对象。</li>
+</ol>
+
+<p>目前，libvirt 已经成为使用最为广泛的对各种虚拟机进行管理的工具和应用程序接口（API），而且一些常用的虚拟机管理工具（如virsh、virt-install、virt-manager等）和云计算框架平台（如OpenStack、OpenNebula、Eucalyptus等）都在底层使用libvirt的应用程序接口。</p>
+
+<h2>实战</h2>
+
+<p>2016-07-17 16:57 Sunday 昨日转战金三角和东区大排档，过了中午顶不住又睡了会</p>
+
+<p>登录到 artigo 上发现&nbsp;virbr0 网卡没出现在 ifconfig 中，service libvirtd restart 成功停止又成功启动。virsh net-list --all 能看到 default，却是不活跃状态，尝试启动之，于是看到错误信息：</p>
+
+<pre>
+# virsh net-start default
+错误：开始网络 default 失败
+错误：Unable to set bridge virbr0 forward_delay: Read-only file system</pre>
+
+<p>一觉醒来，问题解决了，因为睡前感觉在这里已经找到了问题的关键：</p>
+
+<p>https://bugzilla.redhat.com/show_bug.cgi?format=multiple&amp;id=850611</p>
+
+<blockquote>
+<pre>
+Something is wrong with your sysfs (i.e. it is probably mounted read-only) - that error is generated when trying to write to /sys/class/net/virbr0/bridge/forward_delay.
+
+Try the following - as root:
+
+1) brctl addbr testbr # create a bridge device to use for test
+2) echo 3000 &gt;/sys/class/net/testbr/bridge/forward_delay
+3) cat /sys/class/net/testbr/bridge/forward_delay
+
+All three steps should be successful, and the output of the final command should be &quot;2999&quot;.
+
+Please try this out and post your results.</pre>
+
+<p><a href="https://bugzilla.redhat.com/show_bug.cgi?id=850611#c5">Comment 5</a>Steve Kieu&nbsp;2012-08-23 00:51:34 EDT</p>
+
+<pre>
+Found the reason is ..
+
+RedHat default kernel does not support LXC very well esp. the sysfs - so <span class="marker">the problem is that when a containter is started, I mount sysfs as readonly inside the CT but the kernel does not think it is for the new namespace - it applies globally. Thus the host sysfs is re-mounted  readonly.</span>
+
+I will fire another bug report about sysfs here soon if I could not find existing related bug . Using vanilla kernel 3.2.18 the problem disappear.</pre>
+</blockquote>
+
+<p>于是赶紧查看自己的 nginx 这个 lxc 容器的 config 文件，果然第一行就是：</p>
+
+<pre>
+lxc.mount.auto = proc:mixed sys:ro</pre>
+
+<p>注释掉，或者参考&nbsp;http://man7.org/linux/man-pages/man5/lxc.container.conf.5.html 中的 lxc.mount.auto 部分，只要避免 sys:ro 权限问题就解决了。</p>
