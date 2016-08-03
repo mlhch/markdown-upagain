@@ -1980,7 +1980,14 @@ showdown.subParser('italicsAndBold', function (text, options, globals) {
   } else {
     // <strong> must go first:
     text = text.replace(/(\*\*|__)(?=\S)([^\r]*?\S[*_]*)\1/g, '<strong>$2</strong>');
-    text = text.replace(/(\*|_)(?=\S)([^\r]*?\S)\1/g, '<em>$2</em>');
+    /// 2016-08-03 10:34 Wednesday 去年老婆孩子，老丈人今天出院
+    /// - 例外：
+    ///   The resulting repository will be found at https://github.com/<your_username>/blog.
+    ///   To create a repository under an organization for which you’re an owner, just change
+    ///   the API method from /user/repos to /orgs/<org_name>/repos.
+    /// - 改进：增加 \/\. 即不允许 _..._ 的形式跨越反斜线和英语句号
+    // text = text.replace(/(\*|_)(?=\S)([^\r]*?\S)\1/g, '<em>$2</em>');
+    text = text.replace(/(\*|_)(?=\S)([^\r\/\.]*?\S)\1/g, '<em>$2</em>');
   }
 
   text = globals.converter._dispatch('italicsAndBold.after', text, options, globals);
