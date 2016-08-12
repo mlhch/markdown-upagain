@@ -408,7 +408,7 @@ module.exports = [
   {
     filter: 'br',
     replacement: function () {
-      return '  \n';
+      return '\n';
     }
   },
 
