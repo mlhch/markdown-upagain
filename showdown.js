@@ -2289,7 +2289,10 @@ showdown.subParser('spanGamut', function (text, options, globals) {
   text = showdown.subParser('strikethrough')(text, options, globals);
 
   // Do hard breaks:
-  text = text.replace(/  +\n/g, ' <br />\n');
+  // text = text.replace(/  +\n/g, ' <br />\n');
+  /// 2016-08-01 21:26 Monday
+  /// 窃以为，行尾有两个空格对 git 不友好
+  text = text.replace(/\n/g, '<br />\n');
 
   text = globals.converter._dispatch('spanGamut.after', text, options, globals);
   return text;
