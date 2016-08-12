@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="initial-scale=1">
-<title>to-markdown - an HTML to Markdown converter written in javascript</title>
-<link rel="stylesheet" href="bower_components/normalize.css/normalize.css"></link>
+<title>markdown-viceversa</title>
+<link rel="stylesheet" href="normalize.css" />
 <style>
   .cf:before,
   .cf:after {
@@ -110,7 +110,7 @@
     }
   }
 </style>
-<script src="bower_components/to-markdown/dist/to-markdown.js"></script>
+<script src="to-markdown.js"></script>
 <script>
 (function () {
   var input, output, gfm;
@@ -133,25 +133,8 @@
   });
 })();
 </script>
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-26662448-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 </head>
 <body>
-  <header>
-    <h1>to-markdown</h1>
-    <a style="float: right" href="https://github.com/domchristie/to-markdown">Source on GitHub</a>
-  </header>
   <div class="row cf toolbar">
     <div class="col">
       <label><input type="checkbox" id="gfm"> GitHub Flavored Markdown</label>
@@ -160,16 +143,7 @@
   <div class="row cf">
     <div class="col">
       <h2>HTML</h2>
-      <textarea id="input" cols="100" rows="10"><h3>Some HTML</h3>
-
-<p>Hello world! This demonstrates <a href="https://github.com/domchristie/to-markdown">to-markdown</a> – an HTML to Markdown converter.</p>
-
-<hr />
-
-<ol>
-  <li>Number 1</li>
-  <li>Number Two</li>
-</ol></textarea>
+      <textarea id="input" cols="100" rows="10"></textarea>
     </div>
 
     <div class="col">
@@ -177,8 +151,5 @@
       <textarea readonly id="output"></textarea>
     </div>
   </div>
-  <footer>
-    <p>to-markdown is copyright &copy; 2011-15 <a href="http://domchristie.co.uk">Dom Christie</a> and is released under the MIT licence.</p>
-  </footer>
 </body>
 </html>
