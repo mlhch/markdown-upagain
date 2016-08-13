@@ -1277,7 +1277,7 @@ showdown.subParser('blockGamut', function (text, options, globals) {
   text = showdown.subParser('headers')(text, options, globals);
 
   // Do Horizontal Rules:
-  var key = showdown.subParser('hashBlock')('<hr />', options, globals);
+  var key = showdown.subParser('hashBlock')('<hr>', options, globals);
   text = text.replace(/^[ ]{0,2}([ ]?\*[ ]?){3,}[ \t]*$/gm, key);
   text = text.replace(/^[ ]{0,2}([ ]?\-[ ]?){3,}[ \t]*$/gm, key);
   text = text.replace(/^[ ]{0,2}([ ]?_[ ]?){3,}[ \t]*$/gm, key);
@@ -1958,7 +1958,7 @@ showdown.subParser('images', function (text, options, globals) {
       result += ' height="' + height + '"';
     }
 
-    result += ' />';
+    result += '>';
 
     return result;
   }
@@ -2315,7 +2315,7 @@ showdown.subParser('spanGamut', function (text, options, globals) {
   // text = text.replace(/  +\n/g, ' <br />\n');
   /// 2016-08-01 21:26 Monday
   /// 窃以为，行尾有两个空格对 git 不友好
-  text = text.replace(/\n/g, '<br />\n');
+  text = text.replace(/\n/g, '<br>\n');
 
   /// 2016-07-30 12:25 Saturday
   /// &#160; 要换成 &nbsp;
