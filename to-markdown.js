@@ -251,6 +251,12 @@ toMarkdown = function (input, options) {
   // Escape potential ol triggers
   input = input.replace(/(\d+)\. /g, '$1\\. ');
 
+  /// 2016-08-13 12:36 Saturday
+  /// - 转义 markdown 特殊符号
+  input = input.replace(/(^|>|\s)([*_])(.*?)\2(\s|<|$)/g, function (m, m1, m2, m3, m4) {
+    return m1 + '\\' + m2 + m3 + '\\' + m2 + m4;
+  });
+
   var clone = htmlToDom(input).body,
       nodes = bfsOrder(clone),
       output;
