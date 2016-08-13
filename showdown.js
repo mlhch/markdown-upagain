@@ -1277,7 +1277,7 @@ showdown.subParser('blockGamut', function (text, options, globals) {
   text = showdown.subParser('headers')(text, options, globals);
 
   // Do Horizontal Rules:
-  var key = showdown.subParser('hashBlock')('<hr />', options, globals);
+  var key = showdown.subParser('hashBlock')('<hr>', options, globals);
   text = text.replace(/^[ ]{0,2}([ ]?\*[ ]?){3,}[ \t]*$/gm, key);
   text = text.replace(/^[ ]{0,2}([ ]?\-[ ]?){3,}[ \t]*$/gm, key);
   text = text.replace(/^[ ]{0,2}([ ]?_[ ]?){3,}[ \t]*$/gm, key);
@@ -1388,7 +1388,7 @@ showdown.subParser('codeBlocks', function (text, options, globals) {
       end = '';
     }
 
-    codeblock = '<pre>\n' + codeblock + end + '</pre>';
+    codeblock = '<pre>' + codeblock + end + '</pre>';
 
     return showdown.subParser('hashBlock')(codeblock, options, globals) + nextChar;
   });
@@ -1663,7 +1663,7 @@ showdown.subParser('githubCodeBlocks', function (text, options, globals) {
     codeblock = codeblock.replace(/^\n+/g, ''); // trim leading newlines
     codeblock = codeblock.replace(/\n+$/g, ''); // trim trailing whitespace
 
-    codeblock = '<pre>\n<code' + (language ? ' class="' + language + ' language-' + language + '"' : '') + '>' + codeblock + end + '</code></pre>';
+    codeblock = '<pre><code' + (language ? ' class="' + language + ' language-' + language + '"' : '') + '>' + codeblock + end + '</code></pre>';
 
     codeblock = showdown.subParser('hashBlock')(codeblock, options, globals);
 
@@ -1958,7 +1958,7 @@ showdown.subParser('images', function (text, options, globals) {
       result += ' height="' + height + '"';
     }
 
-    result += ' />';
+    result += '>';
 
     return result;
   }
@@ -2315,7 +2315,7 @@ showdown.subParser('spanGamut', function (text, options, globals) {
   // text = text.replace(/  +\n/g, ' <br />\n');
   /// 2016-08-01 21:26 Monday
   /// 窃以为，行尾有两个空格对 git 不友好
-  text = text.replace(/\n/g, '<br />\n');
+  text = text.replace(/\n/g, '<br>\n');
 
   /// 2016-07-30 12:25 Saturday
   /// &#160; 要换成 &nbsp;
