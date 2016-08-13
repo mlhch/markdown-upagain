@@ -1329,7 +1329,10 @@ showdown.subParser('blockQuotes', function (text, options, globals) {
     bq = showdown.subParser('githubCodeBlocks')(bq, options, globals);
     bq = showdown.subParser('blockGamut')(bq, options, globals); // recurse
 
-    bq = bq.replace(/(^|\n)/g, '$1  ');
+    // bq = bq.replace(/(^|\n)/g, '$1  ');
+    /// 2016-08-12 23:46 Friday
+    /// - HTML 就不要缩进了，空行缩进 2 空格对 git 也不友好
+    bq = bq.replace(/(^|\n)/g, '$1');
     // These leading spaces screw with <pre> content, so we need to fix that:
     bq = bq.replace(/(\s*<pre>[^\r]+?<\/pre>)/gm, function (wholeMatch, m1) {
       var pre = m1;
