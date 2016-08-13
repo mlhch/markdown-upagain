@@ -467,6 +467,14 @@ module.exports = [
       return node.nodeName === 'CODE' && !isCodeBlock;
     },
     replacement: function(content) {
+      /// 2016-07-31 08:48 Sunday
+      /// - <code>`</code> 应该加上空格变成 `` ` ``，否则成为 ``` 就迷失了
+      var pos = content.indexOf('`');
+      if (pos == 0 || pos == content.length - 1) {
+        return '`` ' + content + ' ``';
+      } else if (-1 != pos) {
+        return '``' + content + '``';
+      }
       return '`' + content + '`';
     }
   },
