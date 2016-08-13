@@ -1536,6 +1536,8 @@ showdown.subParser('encodeBackslashEscapes', function (text) {
 showdown.subParser('encodeCode', function (text) {
   'use strict';
 
+  /// 2016-08-13 22:01 Saturday
+  /// - 转义 <code></code> 中出现的所有 &，此时 & 失去特殊意义，只表示其自身
   // Encode all ampersands; HTML entities are not
   // entities within a Markdown code span.
   text = text.replace(/&/g, '&amp;');
@@ -2288,22 +2290,9 @@ showdown.subParser('spanGamut', function (text, options, globals) {
   /// 前者是要显示成链接，后者是要显示成 html 源码
   /// 如下表示 <p> 中只允许出现 <a> 元素
   /// 2016-08-01 15:05 Monday
-  /// - <li>git clone git://github.com/<username>/jekyll.git</li>
-
-  text = text.replace(/<([a-z0-9_\-]+)\b(.*)>(([^<]*)<\/\1>)?/g, function(m, m1, m2, m3) {
-    if (m1 == 'http' || m1 == 'https') {
-      /// 2016-08-13 09:08 Saturday
-      /// 解析自动链接
-      return text.replace(/<(https?:\/\/[^ >]+)>/, function (m, m1) {
-        return '<a href="' + m1 + '">' + m1 + '</a>';
-      });
-    }
-    if (m3 && (m1 == 'a' || m1 == 'li')) {
-      return m;
-    }
-    /// 如果不是 <a> 或 <li> 嵌套，一律转义 < 和 >
-    return m.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  });
+  /// - <li>git clone git://github.com/&lt;username&gt;/jekyll.git</li>
+  /// 2016-08-13 23:11 Saturday 今天闷热，没去工作室
+  /// - 今天才明白 <code></code> 中出现的 & 才会被转义为实体
 
   text = showdown.subParser('codeSpans')(text, options, globals);
   text = showdown.subParser('escapeSpecialCharsWithinTagAttributes')(text, options, globals);
