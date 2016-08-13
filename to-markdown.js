@@ -401,6 +401,13 @@ module.exports = [
   {
     filter: 'p',
     replacement: function (content) {
+      /// 注意 [  ] 中是一个空格 #32 和一个 &nbsp; #160
+      content = content.replace(/(^|\n|\s|`)([\\`\*_#+\-!][  ])/g, function (m, m1, m2) {
+        if (m1 == '`' && m2[0] == '`') {
+          return m;
+        }
+        return m1 + '\\' + m2;
+      });
       return '\n\n' + content + '\n\n';
     }
   },
