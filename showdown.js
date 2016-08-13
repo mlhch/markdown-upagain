@@ -2274,6 +2274,32 @@ showdown.subParser('spanGamut', function (text, options, globals) {
   'use strict';
 
   text = globals.converter._dispatch('spanGamut.before', text, options, globals);
+
+  /// 2016-07-29 15:18 Friday
+  /// - 在 <p> <br /> 被加入之前处理 < 和 >
+  /// - 放 italicsAndBold 之前，因为它会把 *abc* 转变为 <em>abc</em>
+  /// 2016-07-29 16:09 Friday
+  /// - <p> 中出现的 "<a href" 和 "&lt; href" 含义是不同的，
+  /// 前者是要显示成链接，后者是要显示成 html 源码
+  /// 如下表示 <p> 中只允许出现 <a> 元素
+  /// 2016-08-01 15:05 Monday
+  /// - <li>git clone git://github.com/<username>/jekyll.git</li>
+
+  text = text.replace(/<([a-z0-9_\-]+)\b(.*)>(([^<]*)<\/\1>)?/g, function(m, m1, m2, m3) {
+    if (m1 == 'http' || m1 == 'https') {
+      /// 2016-08-13 09:08 Saturday
+      /// 解析自动链接
+      return text.replace(/<(https?:\/\/[^ >]+)>/, function (m, m1) {
+        return '<a href="' + m1 + '">' + m1 + '</a>';
+      });
+    }
+    if (m3 && (m1 == 'a' || m1 == 'li')) {
+      return m;
+    }
+    /// 如果不是 <a> 或 <li> 嵌套，一律转义 < 和 >
+    return m.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  });
+
   text = showdown.subParser('codeSpans')(text, options, globals);
   text = showdown.subParser('escapeSpecialCharsWithinTagAttributes')(text, options, globals);
   text = showdown.subParser('encodeBackslashEscapes')(text, options, globals);

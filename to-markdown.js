@@ -464,6 +464,11 @@ module.exports = [
     },
     replacement: function(content, node) {
       var titlePart = node.title ? ' "'+ node.title +'"' : '';
+      /// 2016-08-13 09:01 Saturday
+      /// - 链接与文本相同时认为是自动链接
+      if (!titlePart && content == node.getAttribute('href')) {
+        return '<' + content + '>';
+      }
       return '[' + content + '](' + node.getAttribute('href') + titlePart + ')';
     }
   },
