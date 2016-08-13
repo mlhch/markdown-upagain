@@ -244,6 +244,16 @@ function process(node) {
 toMarkdown = function (input, options) {
   options = options || {};
 
+  options.converters = [{
+    filter: 'pre',
+    replacement: function(content, node) {
+      if (node.firstChild && node.firstChild.nodeName === 'CODE') {
+        return '\n\n```\n' + node.firstChild.textContent.replace(/\n+$/, '') + '\n```\n\n';
+      }
+      return '    ' + content.replace(/\n/g, '\n    ') + '\n\n';
+    }
+  }]
+
   if (typeof input !== 'string') {
     throw new TypeError(input + ' is not a string');
   }
@@ -447,7 +457,7 @@ module.exports = [
   {
     filter: ['em', 'i'],
     replacement: function (content) {
-      return '_' + content + '_';
+      return '*' + content + '*';
     }
   },
 
