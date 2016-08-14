@@ -1388,7 +1388,7 @@ showdown.subParser('codeBlocks', function (text, options, globals) {
       end = '';
     }
 
-    codeblock = '<pre><code>' + codeblock + end + '</code></pre>';
+    codeblock = '<pre>' + codeblock + end + '</pre>';
 
     return showdown.subParser('hashBlock')(codeblock, options, globals) + nextChar;
   });
@@ -1500,6 +1500,8 @@ showdown.subParser('encodeAmpsAndAngles', function (text) {
   'use strict';
   // Ampersand-encoding based entirely on Nat Irons's Amputator MT plugin:
   // http://bumppo.net/projects/amputator/
+  /// 2016-07-30 19:13 Saturday
+  /// 看正则的字面意思是 非实体 中的 & 要替换成 &amp;
   text = text.replace(/&(?!#?[xX]?(?:[0-9a-fA-F]+|\w+);)/g, '&amp;');
 
   // Encode naked <'s
@@ -1935,7 +1937,10 @@ showdown.subParser('images', function (text, options, globals) {
     altText = altText.replace(/"/g, '&quot;');
     altText = showdown.helper.escapeCharacters(altText, '*_', false);
     url = showdown.helper.escapeCharacters(url, '*_', false);
-    var result = '<img src="' + url + '" alt="' + altText + '"';
+    // var result = '<img src="' + url + '" alt="' + altText + '"';
+    /// 2016-07-30 14:08 Saturday
+    /// - 先 alt 后 src
+    var result = '<img alt="' + altText + '" src="' + url + '"';
 
     if (title) {
       title = title.replace(/"/g, '&quot;');
@@ -2323,6 +2328,16 @@ showdown.subParser('spanGamut', function (text, options, globals) {
   /// 窃以为，行尾有两个空格对 git 不友好
   text = text.replace(/\n/g, '<br />\n');
 
+  /// 2016-07-30 12:25 Saturday
+  /// &#160; 要换成 &nbsp;
+  text = text.replace(/\xa0/g, '&nbsp;');
+  text = text.replace(/—/g, '&mdash;');
+  text = text.replace(/’/g, '&rsquo;');
+  text = text.replace(/”/g, '&rdquo;');
+  text = text.replace(/‘/g, '&lsquo;');
+  text = text.replace(/“/g, '&ldquo;');
+  text = text.replace(/·/g, '&middot;');
+
   text = globals.converter._dispatch('spanGamut.after', text, options, globals);
   return text;
 });
@@ -2573,6 +2588,5 @@ if (typeof module !== 'undefined' && module.exports) {
 } else {
   root.showdown = showdown;
 }
-}).call(this);
 
-//# sourceMappingURL=showdown.js.map
+}).call(this);
