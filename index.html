@@ -36,6 +36,11 @@
     overflow: auto;
   }
 
+  label pre {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
   #clean-html {
     white-space: pre-wrap;
     word-break: break-all;
@@ -138,8 +143,36 @@ var _hmt = _hmt || [];
       <h2>Paste raw HTML here</h2>
     </div>
     <div class="col">
-      <h2>Cleaned by Native Browser's DOMParser</h2>
+      <h2>Cleaned HTML</h2>
     </div>
+  </div>
+  <div class="row cf">
+    <ul>
+      <li>&lt;pre&gt; open style:<br />
+        <label><input type="radio" name="preopen" value="sameline">
+          <pre>&lt;pre&gt;&lt;code&gt;This is a code block.</pre>
+        </label>
+        <label><input type="radio" name="preopen" value="newline">
+          <pre>&lt;pre&gt;<br />&lt;code&gt;This is a code block.</pre>
+        </label>
+      </li>
+      <li>&lt;pre&gt; close style:<br />
+        <label><input type="radio" name="preclose" value="newline">
+          <pre>close at same line.&lt;/pre&gt;</pre>
+        </label>
+        <label><input type="radio" name="preclose" value="sameline">
+          <pre>close at new line.<br />&lt;/pre&gt;</pre>
+        </label>
+      </li>
+      <li>Close tag style:<br />
+        <label><input type="radio" name="closetag" value="html5">
+          <pre>&lt;br&gt; and &lt;hr&gt; and &lt;img&gt;</pre>
+        </label>
+        <label><input type="radio" name="closetag" value="xhtml">
+          <pre>&lt;br /&gt; and &lt;hr /&gt; and &lt;img /&gt;</pre>
+        </label>
+      </li>
+    </ul>
   </div>
 
   <div class="row cf">

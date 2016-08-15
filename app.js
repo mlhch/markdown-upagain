@@ -43,13 +43,41 @@ jQuery.fn.autoHeight = function autoHeightTextarea() {
 document.addEventListener("DOMContentLoaded", function(event) {
   var rawHtml, cleanHtml;
 
-  var showdownConverter = new showdown.Converter({
+  var showdownOptions = {
     noHeaderId: true,
     literalMidWordUnderscores: false
-  });
+  };
+  var showdownConverter;
 
-  $.get('test.html', function(testHtml) {
+  $.get('1.html', function(testHtml) {
     $('#raw-html').val(testHtml).autoHeight();
+
+    if (testHtml.match(/<pre>\n/)) {
+      showdownOptions.preopen = 'newline';
+      $('[name=preopen][value=newline]').attr('checked', true);
+    } else {
+      showdownOptions.preopen = 'sameline';
+      $('[name=preopen][value=sameline]').attr('checked', true);
+    }
+
+    if (testHtml.match(/\n<\/pre>/)) {
+      showdownOptions.omitExtraWLInCodeBlocks = false;
+      $('[name=preclose][value=newline]').attr('checked', true);
+    } else {
+      showdownOptions.omitExtraWLInCodeBlocks = true;
+      $('[name=preclose][value=sameline]').attr('checked', true);
+    }
+
+    if (testHtml.match(/<(br|hr|img)>/)) {
+      showdownOptions.closetag = 'html5';
+      $('[name=closetag][value=html5]').attr('checked', true);
+    } else {
+      showdownOptions.closetag = 'xhtml';
+      $('[name=closetag][value=xhtml]').attr('checked', true);
+    }
+
+    showdownConverter = new showdown.Converter(showdownOptions);
+
     preprocess() && convert();
   });
 
