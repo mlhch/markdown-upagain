@@ -528,7 +528,9 @@ module.exports = [
   {
     filter: 'blockquote',
     replacement: function (content) {
-      content = this.trim(content);
+      /// 2016-08-15 12:46 Monday
+      /// - 此处有 bug，当 <blockquote><pre>... 嵌套使用时，trim 会使第一行失去 pre 特征
+      // content = this.trim(content);
       content = content.replace(/\n{3,}/g, '\n\n');
       content = content.replace(/^/gm, '> ');
       return '\n\n' + content + '\n\n';
