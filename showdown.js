@@ -960,6 +960,24 @@ showdown.Converter = function (converterOptions) {
     text = text.replace(/\r\n/g, '\n'); // DOS to Unix
     text = text.replace(/\r/g, '\n'); // Mac to Unix
 
+    /**
+     * 2016-08-19 08:42 Friday
+     * - \u00a0-\u9999 的替换可在全局下进行，因为这其中没有特殊字符
+     * - \u00a0 作为特殊情况单独处理
+     */
+    if (options.entity == 'entities') {
+      text = text.replace(/[\u00a1-\u9999]/g, function(m) {
+        var entity = HTMLEntities[m.charCodeAt(0)];
+        return entity && entity.named || m;
+      });
+    }
+    if (options.nbsp == 'entity') {
+      text = text.replace(/\u00a0/g, '&nbsp;');
+    }
+    if (options.nbsp == 'character') {
+      text = text.replace(/&nbsp;/g, String.fromCharCode(160));
+    }
+
     if (options.smartIndentationFix) {
       text = rTrimInputText(text);
     }
@@ -1147,6 +1165,16 @@ showdown.subParser('anchors', function (text, options, globals) {
       result += ' title="' + title + '"';
     }
 
+    /// 2016-08-18 18:55 Thursday
+    if (options.entity == 'entities') {
+      // linkText = linkText.replace(/(^|<\/h[1-6]|<\/[a-z]+>|<(?:br|hr|img)\b[^>]*>)(.*?)(?=$|<h[1-6]|<[a-z]+|<br\b|<hr\b|<img\b)/g, function (m, m1, m2) {
+      //   return m1 + m2 ? m2.replace(/\u0022|\u0027|[\u00a0-\u9999]/g, function(m) {
+      //     var entity = HTMLEntities[m.charCodeAt(0)];
+      //     return entity && entity.named || m;
+      //   }) : '';
+      // });
+    }
+
     result += '>' + linkText + '</a>';
 
     return result;
@@ -1277,7 +1305,7 @@ showdown.subParser('blockGamut', function (text, options, globals) {
   text = showdown.subParser('headers')(text, options, globals);
 
   // Do Horizontal Rules:
-  var key = showdown.subParser('hashBlock')('<hr>', options, globals);
+  var key = showdown.subParser('hashBlock')(options.closetag == 'xhtml' ? '<hr />' : '<hr>', options, globals);
   text = text.replace(/^[ ]{0,2}([ ]?\*[ ]?){3,}[ \t]*$/gm, key);
   text = text.replace(/^[ ]{0,2}([ ]?\-[ ]?){3,}[ \t]*$/gm, key);
   text = text.replace(/^[ ]{0,2}([ ]?_[ ]?){3,}[ \t]*$/gm, key);
@@ -1379,7 +1407,7 @@ showdown.subParser('codeBlocks', function (text, options, globals) {
         end = '\n';
 
     codeblock = showdown.subParser('outdent')(codeblock);
-    codeblock = showdown.subParser('encodeCode')(codeblock);
+    codeblock = showdown.subParser('encodeCode')(codeblock, options);
     codeblock = showdown.subParser('detab')(codeblock);
     codeblock = codeblock.replace(/^\n+/g, ''); // trim leading newlines
     codeblock = codeblock.replace(/\n+$/g, ''); // trim trailing newlines
@@ -1388,7 +1416,18 @@ showdown.subParser('codeBlocks', function (text, options, globals) {
       end = '';
     }
 
-    codeblock = '<pre>' + codeblock + end + '</pre>';
+    /**
+     * 2016-08-19 18:22 Friday 早上冒雨跑步
+     */
+    if (options.quotes == 'always') {
+      codeblock = codeblock.replace(/\u0027/g, '&apos;').replace(/\u0022/g, '&quot;');
+    }
+
+    codeblock = '<pre>'
+      + (options.preopen == 'newline' ? '\n' : '')
+      + codeblock
+      + (options.preclose == 'newline' ? '\n' : '')
+      + '</pre>';
 
     return showdown.subParser('hashBlock')(codeblock, options, globals) + nextChar;
   });
@@ -1451,7 +1490,7 @@ showdown.subParser('codeSpans', function (text, options, globals) {
       var c = m3;
       c = c.replace(/^([ \t]*)/g, '');	// leading whitespace
       c = c.replace(/[ \t]*$/g, '');	// trailing whitespace
-      c = showdown.subParser('encodeCode')(c);
+      c = showdown.subParser('encodeCode')(c, options);
       return m1 + '<code>' + c + '</code>';
     }
   );
@@ -1496,13 +1535,15 @@ showdown.subParser('detab', function (text) {
 /**
  * Smart processing for ampersands and angle brackets that need to be encoded.
  */
-showdown.subParser('encodeAmpsAndAngles', function (text) {
+showdown.subParser('encodeAmpsAndAngles', function (text, options) {
   'use strict';
   // Ampersand-encoding based entirely on Nat Irons's Amputator MT plugin:
   // http://bumppo.net/projects/amputator/
   /// 2016-07-30 19:13 Saturday
   /// 看正则的字面意思是 非实体 中的 & 要替换成 &amp;
-  text = text.replace(/&(?!#?[xX]?(?:[0-9a-fA-F]+|\w+);)/g, '&amp;');
+  if (options.ampersand == 'always') {
+    text = text.replace(/&(?!#?[xX]?(?:[0-9a-fA-F]+|\w+);)/g, '&amp;');
+  }
 
   // Encode naked <'s
   text = text.replace(/<(?![a-z\/?\$!])/gi, '&lt;');
@@ -1533,7 +1574,7 @@ showdown.subParser('encodeBackslashEscapes', function (text) {
  * The point is that in code, these characters are literals,
  * and lose their special Markdown meanings.
  */
-showdown.subParser('encodeCode', function (text) {
+showdown.subParser('encodeCode', function (text, options) {
   'use strict';
 
   /// 2016-08-13 22:01 Saturday
@@ -1658,12 +1699,16 @@ showdown.subParser('githubCodeBlocks', function (text, options, globals) {
     var end = (options.omitExtraWLInCodeBlocks) ? '' : '\n';
 
     // First parse the github code block
-    codeblock = showdown.subParser('encodeCode')(codeblock);
+    codeblock = showdown.subParser('encodeCode')(codeblock, options);
     codeblock = showdown.subParser('detab')(codeblock);
     codeblock = codeblock.replace(/^\n+/g, ''); // trim leading newlines
     codeblock = codeblock.replace(/\n+$/g, ''); // trim trailing whitespace
 
-    codeblock = '<pre><code' + (language ? ' class="' + language + ' language-' + language + '"' : '') + '>' + codeblock + end + '</code></pre>';
+    codeblock = '<pre>' + (options.preopen == 'newline' ? '\n' : '')
+      + '<code' + (language ? ' class="' + language + ' language-' + language + '"' : '') + '>'
+      + (options.precodeopen == 'newline' ? '\n' : '')
+      + codeblock
+      + (options.precodeclose == 'newline' ? '\n' : '') + '</code></pre>';
 
     codeblock = showdown.subParser('hashBlock')(codeblock, options, globals);
 
@@ -1808,7 +1853,7 @@ showdown.subParser('hashPreCodeTags', function (text, config, globals) {
 
   var repFunc = function (wholeMatch, match, left, right) {
     // encode html entities
-    var codeblock = left + showdown.subParser('encodeCode')(match) + right;
+    var codeblock = left + showdown.subParser('encodeCode')(match, options) + right;
     return '\n\n~G' + (globals.ghCodeBlocks.push({text: wholeMatch, codeblock: codeblock}) - 1) + 'G\n\n';
   };
 
@@ -1903,6 +1948,9 @@ showdown.subParser('images', function (text, options, globals) {
   var inlineRegExp    = /!\[(.*?)]\s?\([ \t]*()<?(\S+?)>?(?: =([*\d]+[A-Za-z%]{0,4})x([*\d]+[A-Za-z%]{0,4}))?[ \t]*(?:(['"])(.*?)\6[ \t]*)?\)/g,
       referenceRegExp = /!\[([^\]]*?)] ?(?:\n *)?\[(.*?)]()()()()()/g;
 
+  /// 2016-08-18 18:33 Thursday 刚刚楼下好像电动车撞了个女人，不一会儿120就来了
+  inlineRegExp    = /!\[([^\]]*?)]\s?()\(([^ ]+)()()()(?: "(.+?)")?\)/g;
+
   function writeImageTag (wholeMatch, altText, linkId, url, width, height, m5, title) {
 
     var gUrls   = globals.gUrls,
@@ -1958,7 +2006,7 @@ showdown.subParser('images', function (text, options, globals) {
       result += ' height="' + height + '"';
     }
 
-    result += '>';
+    result += options.closetag == 'xhtml' ? ' />' : '>';
 
     return result;
   }
@@ -2230,7 +2278,7 @@ showdown.subParser('paragraphs', function (text, options, globals) {
         // we need to check if ghBlock is a false positive
         if (codeFlag) {
           // use encoded version of all text
-          blockText = showdown.subParser('encodeCode')(globals.ghCodeBlocks[num].text);
+          blockText = showdown.subParser('encodeCode')(globals.ghCodeBlocks[num].text, options);
         } else {
           blockText = globals.ghCodeBlocks[num].codeblock;
         }
@@ -2294,6 +2342,26 @@ showdown.subParser('spanGamut', function (text, options, globals) {
   /// 2016-08-13 23:11 Saturday 今天闷热，没去工作室
   /// - 今天才明白 <code></code> 中出现的 & 才会被转义为实体
 
+  if (options.ltgt == 'always') {
+    text = text.replace(/<([a-z]+|h[1-6]\b)([^>]*)>/g, function (m, m1, m2) {
+      return '((' + m1 + m2 + '))';
+    }).replace(/<\/([a-z]+|h[1-6])>/g, function (m, m1) {
+      return '((/' + m1 + '))';
+    }).replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/\(\(/g, '<').replace(/\)\)/g, '>');
+  }
+
+  if (options.entity == 'entitis') {
+    /**
+     * 2016-08-19 07:48 Friday 小雨跑步上班
+     * - 此时链接还未被解析，所以单双引号不要处理，只处理 160 以上的
+     */
+    text = text.replace(/[\u00a0-\u9999]/g, function(m) {
+      var entity = HTMLEntities[m.charCodeAt(0)];
+      return entity && entity.named || m;
+    });
+  }
+
   text = showdown.subParser('codeSpans')(text, options, globals);
   text = showdown.subParser('escapeSpecialCharsWithinTagAttributes')(text, options, globals);
   text = showdown.subParser('encodeBackslashEscapes')(text, options, globals);
@@ -2315,17 +2383,7 @@ showdown.subParser('spanGamut', function (text, options, globals) {
   // text = text.replace(/  +\n/g, ' <br />\n');
   /// 2016-08-01 21:26 Monday
   /// 窃以为，行尾有两个空格对 git 不友好
-  text = text.replace(/\n/g, '<br>\n');
-
-  /// 2016-07-30 12:25 Saturday
-  /// &#160; 要换成 &nbsp;
-  text = text.replace(/\xa0/g, '&nbsp;');
-  text = text.replace(/—/g, '&mdash;');
-  text = text.replace(/’/g, '&rsquo;');
-  text = text.replace(/”/g, '&rdquo;');
-  text = text.replace(/‘/g, '&lsquo;');
-  text = text.replace(/“/g, '&ldquo;');
-  text = text.replace(/·/g, '&middot;');
+  text = text.replace(/\n/g, options.closetag == 'xhtml' ? '<br />\n' : '<br>\n'); 
 
   text = globals.converter._dispatch('spanGamut.after', text, options, globals);
   return text;
@@ -2389,7 +2447,7 @@ showdown.subParser('stripLinkDefinitions', function (text, options, globals) {
 
   text = text.replace(regex, function (wholeMatch, linkId, url, width, height, blankLines, title) {
     linkId = linkId.toLowerCase();
-    globals.gUrls[linkId] = showdown.subParser('encodeAmpsAndAngles')(url);  // Link IDs are case-insensitive
+    globals.gUrls[linkId] = showdown.subParser('encodeAmpsAndAngles')(url, options);  // Link IDs are case-insensitive
 
     if (blankLines) {
       // Oops, found blank lines, so it's not a title.

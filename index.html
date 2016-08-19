@@ -34,21 +34,23 @@
     word-wrap: normal;
     width: 100%;
     overflow: auto;
+    border: 0;
   }
 
   label pre {
     display: inline-block;
     vertical-align: middle;
+    margin: 0;
+    padding: 3px;
   }
 
   #clean-html {
     white-space: pre-wrap;
     word-break: break-all;
     overflow: auto;
-    border: 1px solid gray;
   }
   #clean-html del {
-    display: none;
+    display: inline;
   }
 
   #raw-html {
@@ -100,7 +102,6 @@
     text-decoration: none;
     color: red;
     background-color: pink;
-    display: none;
   }
   ins {
     background-color: lightgreen;
@@ -144,33 +145,102 @@ var _hmt = _hmt || [];
     </div>
     <div class="col">
       <h2>Cleaned HTML</h2>
+      <span id="cleanMessage"></span>
     </div>
   </div>
   <div class="row cf">
     <ul>
       <li>&lt;pre&gt; open style:<br />
         <label><input type="radio" name="preopen" value="sameline">
-          <pre>&lt;pre&gt;&lt;code&gt;This is a code block.</pre>
+          <pre>&lt;pre&gt;This is a code block.</pre>
         </label>
         <label><input type="radio" name="preopen" value="newline">
-          <pre>&lt;pre&gt;<br />&lt;code&gt;This is a code block.</pre>
+          <pre>&lt;pre&gt;<br />This is a code block.</pre>
         </label>
       </li>
       <li>&lt;pre&gt; close style:<br />
-        <label><input type="radio" name="preclose" value="newline">
+        <label><input type="radio" name="preclose" value="sameline">
           <pre>close at same line.&lt;/pre&gt;</pre>
         </label>
-        <label><input type="radio" name="preclose" value="sameline">
+        <label><input type="radio" name="preclose" value="newline">
           <pre>close at new line.<br />&lt;/pre&gt;</pre>
         </label>
       </li>
-      <li>Close tag style:<br />
+      <li>&lt;pre&gt;&lt;code&gt; style:<br />
+        <label><input type="radio" name="precodeopen" value="sameline">
+          <pre>&lt;pre&gt;&lt;code&gt;This is a code block.</pre>
+        </label>
+        <label><input type="radio" name="precodeopen" value="newline">
+          <pre>&lt;pre&gt;&lt;code&gt;<br />This is a code block.</pre>
+        </label>
+      </li>
+      <li>&lt;/code&gt;&lt;/pre&gt; style:<br />
+        <label><input type="radio" name="precodeclose" value="sameline">
+          <pre>close at same line.&lt;/code&gt;&lt;/pre&gt;</pre>
+        </label>
+        <label><input type="radio" name="precodeclose" value="newline">
+          <pre>close at new line.<br />&lt;/code&gt;&lt;/pre&gt;</pre>
+        </label>
+      </li>
+      <li>Close tag style:<span></span><br />
         <label><input type="radio" name="closetag" value="html5">
           <pre>&lt;br&gt; and &lt;hr&gt; and &lt;img&gt;</pre>
         </label>
         <label><input type="radio" name="closetag" value="xhtml">
           <pre>&lt;br /&gt; and &lt;hr /&gt; and &lt;img /&gt;</pre>
         </label>
+      </li>
+      <li>Escape [<] and [>] as [&amp;lt;] and [&amp;gt;]<span></span>
+        <p>
+          <label><input type="radio" name="ltgt" value="needed">
+            When need escape
+          </label>
+          <label><input type="radio" name="ltgt" value="always">
+            Always
+          </label>
+        </p>
+      </li>
+      <li>Escape [&] as [&amp;amp;]<span></span>
+        <p>
+          <label><input type="radio" name="ampersand" value="needed">
+            When need escape
+          </label>
+          <label><input type="radio" name="ampersand" value="always">
+            Always
+          </label>
+        </p>
+      </li>
+      <li>Escape ['] and ["] as [&amp;apos;] and [&amp;quot;]<span></span>
+        <p>
+          <label><input type="radio" name="quotes" value="needed">
+            When need escape
+          </label>
+          <label><input type="radio" name="quotes" value="always">
+            Always
+          </label>
+        </p>
+      </li>
+      <li>&amp;nbsp; or its character<span></span>
+        <p>
+          <label><input type="radio" name="nbsp" value="character">
+            Use the character itself
+          </label>
+          <label><input type="radio" name="nbsp" value="entity">
+            Use the HTML Entity "&amp;nbsp;"
+          </label>
+        </p>
+      </li>
+      <li>Normal HTML Entities and UTF8 characters<span></span>
+        <p>
+          <label>
+            <input type="radio" name="entity" value="entities">
+            All convert to HTML Entities
+          </label>
+          <label>
+            <input type="radio" name="entity" value="utf8char">
+            All convert to UTF8 characters
+          </label>
+        </p>
       </li>
     </ul>
   </div>
@@ -185,7 +255,7 @@ var _hmt = _hmt || [];
   </div>
 
   <h1>
-    Step 2: <button onclick="convert()">Convert to Markdown</button>
+    Step 2: <button onclick="convertToMarkdown()">Convert to Markdown</button>
   </h1>
 
 <!--
